@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<body>
+<textarea id="chat" rows="15" cols="50" readonly></textarea><br>
+<input id="msg" placeholder="Message" size="40">
+<button onclick="send()">Send</button>
+
+<script>
+const server = ""; // leave empty for local test, add Railway URL later
+
+async function load() {
+  const res = await fetch(server + "/messages");
+  const data = await res.json();
+  chat.value = data.map(m => {
+    const t = new Date(m[0]).toLocaleTimeString();
+    return `[${t}] ${m[1]}`;
+  }).join("\n");
+}
+
+async function send() {
+  const text = msg.value.trim();
+  if (!text) return;
+  await fetch(server + "/send", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({text})
+  });
+  msg.value = "";
+  await load();
+}
+
+setInterval(load, 2000);
+load();
+</script>
+</body>
+</html>
